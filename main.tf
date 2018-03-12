@@ -34,14 +34,15 @@ resource "aws_db_subnet_group" "this" {
 # CREATE AURORA CLUSTER
 # -------------------------------
 resource "aws_rds_cluster_instance" "this" {
+  engine = "${var.engine}"
   identifier         = "${lower(local.id)}"
   cluster_identifier = "${aws_rds_cluster.this.id}"
   instance_class     = "${var.type}"
   db_subnet_group_name = "${aws_db_subnet_group.this.name}"
-  engine = "${var.engine}"
 }
 
 resource "aws_rds_cluster" "this" {
+  engine = "${var.engine}" 
   cluster_identifier = "${lower(local.id)}"
   availability_zones = ["${var.azs}"]
   database_name      = "${var.db_name}"
