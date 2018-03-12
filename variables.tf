@@ -59,6 +59,11 @@ variable "type" {
   default     = "db.t2.small"
 }
 
+variable "engine" {
+  description = "Engine"
+  default     = "aurora-mysql"
+}
+
 variable "db_name" {
   description = "Database name."
   default     = "app"

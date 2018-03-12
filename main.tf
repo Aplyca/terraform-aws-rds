@@ -38,6 +38,7 @@ resource "aws_rds_cluster_instance" "this" {
   cluster_identifier = "${aws_rds_cluster.this.id}"
   instance_class     = "${var.type}"
   db_subnet_group_name = "${aws_db_subnet_group.this.name}"
+  engine = "${var.engine}"
 }
 
 resource "aws_rds_cluster" "this" {
