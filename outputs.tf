@@ -1,3 +1,3 @@
 output "endpoint" {
-  value = "${aws_db_instance.this.endpoint}"
+  value = "${var.cluster ? aws_rds_cluster.this.endpoint : aws_db_instance.this.endpoint }"
 }
