@@ -3,9 +3,19 @@ variable "name" {
   default     = "App"
 }
 
-variable "record" {
-  description = "Record prefix for EFS endpoint."
-  default     = "db"
+variable "cluster" {
+  description = "Enable/disable cluster."
+  default     = false
+}
+
+variable "storage" {
+  description = "Storage size for the DB."
+  default     = 10
+}
+
+variable "port" {
+  description = "DB port."
+  default     = 3306
 }
 
 variable "azs" {
@@ -38,11 +48,6 @@ variable "rt_id" {
   description = "Route Table Id to assing to the EFS subnet."
 }
 
-
-variable "zone_id" {
-  description = "Zone Id where the EFS record will be created."
-}
-
 variable "access_cidrs" {
   description = "A list of Subnets CIDR Blocks to grant access"
   type        = "list"
@@ -62,6 +67,11 @@ variable "type" {
 variable "engine" {
   description = "Engine"
   default     = "aurora-mysql"
+}
+
+variable "engine_version" {
+  description = "Engine version"
+  default     = "5.7"
 }
 
 variable "db_name" {

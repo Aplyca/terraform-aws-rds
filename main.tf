@@ -31,9 +31,31 @@ resource "aws_db_subnet_group" "this" {
 }
 
 # -------------------------------
-# CREATE AURORA CLUSTER
+# CREATE RDS
 # -------------------------------
+
+resource "aws_db_instance" "this" {
+  count = "${var.cluster ? 0 : 1 }"
+  identifier           = "${lower(local.id)}"
+  allocated_storage    = "${var.storage}"
+  storage_type         = "gp2"
+  engine               = "${var.engine}"
+  engine_version       = "${var.engine_version}"
+  instance_class       = "${var.type}"
+  name                 = "${var.db_name}"
+  username             = "${var.db_user}"
+  password             = "${var.db_password}"
+  db_subnet_group_name = "${aws_db_subnet_group.this.name}"
+  vpc_security_group_ids = ["${aws_security_group.this.id}"]
+  final_snapshot_identifier = "${local.id}"
+  tags = "${merge(var.tags, map("Name", var.name))}"
+  copy_tags_to_snapshot = true
+  backup_retention_period = 7
+  storage_encrypted = true
+}
+
 resource "aws_rds_cluster_instance" "this" {
+  count = "${var.cluster ? 1 : 0 }"
   engine = "${var.engine}"
   identifier         = "${lower(local.id)}"
   cluster_identifier = "${aws_rds_cluster.this.id}"
@@ -42,7 +64,8 @@ resource "aws_rds_cluster_instance" "this" {
 }
 
 resource "aws_rds_cluster" "this" {
-  engine = "${var.engine}" 
+  count = "${var.cluster ? 1 : 0 }"
+  engine = "${var.engine}"
   cluster_identifier = "${lower(local.id)}"
   availability_zones = ["${var.azs}"]
   database_name      = "${var.db_name}"
@@ -73,8 +96,8 @@ resource "aws_network_acl_rule" "inbound" {
   protocol       = "tcp"
   rule_action    = "allow"
   cidr_block     = "${element(var.access_cidrs, count.index)}"
-  from_port      = 3306
-  to_port        = 3306
+  from_port      = "${var.port}"
+  to_port        = "${var.port}"
 }
 
 resource "aws_network_acl_rule" "outbound" {
@@ -92,12 +115,12 @@ resource "aws_network_acl_rule" "outbound" {
 # Security group Database access
 resource "aws_security_group" "this" {
   name = "${local.id}-DB"
-  description = "Access to DB port (3306)"
+  description = "Access to DB port"
   vpc_id = "${data.aws_vpc.this.id}"
 
   ingress {
-    from_port = 3306
-    to_port = 3306
+    from_port = "${var.port}"
+    to_port = "${var.port}"
     protocol = "tcp"
     security_groups = ["${var.access_sg_ids}"]
   }
@@ -110,12 +133,4 @@ resource "aws_security_group" "this" {
   }
 
   tags = "${merge(var.tags, map("Name", "${var.name} DB"))}"
-}
-
-resource "aws_route53_record" "this" {
-  zone_id = "${var.zone_id}"
-  name = "${var.record}"
-  type = "CNAME"
-  ttl = "600"
-  records = ["${aws_rds_cluster.this.endpoint}"]
 }
