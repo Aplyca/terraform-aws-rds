@@ -87,3 +87,7 @@ variable "db_user" {
 variable "db_password" {
   description = "Database password."
 }
+
+variable "db_snapshot_identifier" {
+  description = "Snapshot for creating new DB."
+}
