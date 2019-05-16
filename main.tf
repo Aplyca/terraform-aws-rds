@@ -71,7 +71,7 @@ resource "aws_rds_cluster" "this" {
   availability_zones = ["${var.azs}"]
   database_name      = "${var.db_name}"
   master_username    = "${var.db_user}"
-  master_password    = "${var.db_password}"
+  master_password    = "${var.db_snapshot_identifier == "" ? var.db_password : "" }"	
   db_subnet_group_name = "${aws_db_subnet_group.this.name}"
   vpc_security_group_ids = ["${aws_security_group.this.id}"]
   final_snapshot_identifier = "${local.id}"
