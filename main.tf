@@ -25,7 +25,7 @@ resource "aws_route_table_association" "this" {
 # -------------------------------------------------------------------------------------------
 resource "aws_db_subnet_group" "this" {
   name       = "${lower(local.id)}"
-  subnet_ids = ["${aws_subnet.this.*.id}"]
+  subnet_ids = "${aws_subnet.this.*.id}"
   description = "${var.name} DB subnet group"
   tags = "${merge(var.tags, map("Name", "${var.name}"))}"
 }
@@ -59,7 +59,7 @@ resource "aws_rds_cluster_instance" "this" {
   count = "${var.cluster ? 1 : 0 }"
   engine = "${var.engine}"
   identifier         = "${lower(local.id)}"
-  cluster_identifier = "${aws_rds_cluster.this.id}"
+  cluster_identifier = "${aws_rds_cluster.this.0.id}"
   instance_class     = "${var.type}"
   db_subnet_group_name = "${aws_db_subnet_group.this.name}"
 }
@@ -68,10 +68,10 @@ resource "aws_rds_cluster" "this" {
   count = "${var.cluster ? 1 : 0 }"
   engine = "${var.engine}"
   cluster_identifier = "${lower(local.id)}"
-  availability_zones = ["${var.azs}"]
+  availability_zones = "${var.azs}"
   database_name      = "${var.db_name}"
   master_username    = "${var.db_user}"
-  master_password    = "${var.db_password}"
+  master_password = "${var.db_snapshot_identifier == "" ? var.db_password : "" }"
   db_subnet_group_name = "${aws_db_subnet_group.this.name}"
   vpc_security_group_ids = ["${aws_security_group.this.id}"]
   final_snapshot_identifier = "${local.id}"
@@ -82,7 +82,7 @@ resource "aws_rds_cluster" "this" {
 # ---------------------------------------
 resource "aws_network_acl" "this" {
   vpc_id = "${data.aws_vpc.this.id}"
-  subnet_ids = ["${aws_subnet.this.*.id}"]
+  subnet_ids = "${aws_subnet.this.*.id}"
   tags = "${merge(var.tags, map("Name", "${var.name} DB"))}"
 }
 
@@ -123,7 +123,7 @@ resource "aws_security_group" "this" {
     from_port = "${var.port}"
     to_port = "${var.port}"
     protocol = "tcp"
-    security_groups = ["${var.access_sg_ids}"]
+    security_groups = "${var.access_sg_ids}"
   }
 
   egress {

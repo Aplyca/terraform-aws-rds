@@ -90,4 +90,5 @@ variable "db_password" {
 
 variable "db_snapshot_identifier" {
   description = "Snapshot for creating new DB."
+  default = ""
 }
